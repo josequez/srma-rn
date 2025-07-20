@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { useNavigation } from '@react-navigation/native';
 
 type Resident = {
   id: string;
@@ -15,11 +16,13 @@ const ResidentsScreen = () => {
   const [residents, setResidents] = useState<Resident[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation();
 
   // Simple in-memory cache for demonstration
   const cacheKey = 'ResidentsCollectionCache';
 
   const fetchResidents = async () => {
+    console.log('Fetching residents from Firestore...');
     setLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, 'ResidentsCollection'));
@@ -122,6 +125,12 @@ const ResidentsScreen = () => {
           !loading ? <Text style={styles.empty}>No residents found.</Text> : null
         }
       />
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('AddResident')}
+      >
+        <Text style={styles.fabIcon}>＋</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -146,6 +155,23 @@ const styles = StyleSheet.create({
   },
   menuText: { fontSize: 22, fontWeight: 'bold' },
   empty: { textAlign: 'center', marginTop: 32, color: '#888' },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    bottom: 24,
+    backgroundColor: '#007AFF',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+  },
+  fabIcon: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
 });
 
 export default ResidentsScreen;
